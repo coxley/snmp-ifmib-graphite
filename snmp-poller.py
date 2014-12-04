@@ -7,9 +7,9 @@ dir = os.path.join(os.path.dirname(__file__), 'src')
 sys.path.insert(0, dir)
 
 import time
-from daemon import Daemon
-import snmppoll
-import logger
+from SNMPPoll.daemon import Daemon
+from SNMPPoll import logger
+from SNMPPoll import snmppoll
 
 log = logger.logger
 

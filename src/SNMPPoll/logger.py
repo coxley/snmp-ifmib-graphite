@@ -1,9 +1,10 @@
+import os
 import logging
 import logging.handlers
 
 
 format = logging.Formatter('%(asctime)s: %(message)s')
-log_file = 'log/snmp-poller.log'
+log_file = os.path.expanduser('~/.snmp-poller/snmp-poller.log')
 logger = logging.getLogger('snmp-poller')
 logger.setLevel(logging.DEBUG)
 handler = logging.handlers.RotatingFileHandler(

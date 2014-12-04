@@ -22,3 +22,7 @@ removing nodes.
 
 The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out
 for each interface on the device in the operational up(1) state.
+
+After installation, simply call ``snmp-poller.py start`` to start the daemon.
+Logs will automatically rotate up to 5 versions and be stored in 
+``~/.snmp-poller/snmp-poller.log``.
