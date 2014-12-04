@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: snmp-ifmib-graphite
+Version: 0.1
+Summary: Configurable SNMP poller for ifMIB data.
+Will run as daemon and output to Graphite via Carbon.
+Home-page: UNKNOWN
+Author: Codey Oxley
+Author-email: codey@cwv.net
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
