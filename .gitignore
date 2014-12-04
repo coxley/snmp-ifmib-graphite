@@ -1,4 +1,4 @@
-log/snmp-poller.log
+log/
 demos/
 *syncthing*
 .gitignore
