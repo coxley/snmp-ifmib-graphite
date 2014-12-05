@@ -1,5 +1,13 @@
 log/
 demos/
+*.pyc
+*.pyo
+build/
+develop-eggs
+eggs
+*.egg-info
+lib
+lib64
 *syncthing*
 .gitignore
 dist/

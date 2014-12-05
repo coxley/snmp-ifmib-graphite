@@ -1,12 +1,12 @@
 Installation
 ============
 
-Must have easy_install installed. 
+Must have pip installed.
 
 Clone directory with git or download and extract master tarball/zip.::
 
     $ python setup.py sdist
-    $ easy_install dist/snmp-ifmib-graphite-<version>.tar.gz
+    $ pip install https://github.com/coxley/snmp-ifmib-graphite/archive/master.zip
 
 
 Usage
