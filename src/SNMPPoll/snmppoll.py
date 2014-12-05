@@ -51,7 +51,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         for iface in m.ifIndex:
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
                     str(m.ifDescr[iface]) not in null_ifs:
-                iface_name = str(m.ifDescr[iface]).replace('/', '_')
+                iface_name = str(m.ifDescr[iface]).replace('/', '_').lower()
                 path_out = '%s.%s.octets_out' % (path, iface_name)
                 path_in = '%s.%s.octets_in' % (path, iface_name)
                 out_octets = int(m.ifHCOutOctets[iface])
@@ -70,7 +70,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
             if_indexes = \
                 {v: k for k, v in m.ifDescr.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
-                iface_name = iface.replace('/', '_')
+                iface_name = iface.replace('/', '_').lower()
                 path_out = '%s.%s.octets_out' % (path, iface_name)
                 path_in = '%s.%s.octets_in' % (path, iface_name)
                 out_octets = int(m.ifHCOutOctets[index])

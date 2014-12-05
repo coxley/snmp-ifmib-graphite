@@ -26,7 +26,11 @@ If ``INTERFACES`` is not defined for a device, by default it will poll all
 interfaces that report as operationally up.
 
 The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out.
-Interface names will be lowercased and ``/`` subbed for ``_``.
+Interface names will be lowercased and ``/`` subbed for ``_``. 
+
+Path I'm using is: customers.<group>.<customer>.devices.<device-type>.<device>
+and it will end up looking like:
+customers.<group>.<customer>.devices.<device-type>.<device>.<interface>.<sub-if>
 
 
 After installation, simply call ``snmp-poller.py start`` to start the daemon.
