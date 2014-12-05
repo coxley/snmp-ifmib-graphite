@@ -7,7 +7,6 @@ from snimpy.manager import load
 from configobj import ConfigObj
 import SNMPPoll.logger
 
-TIMESTAMP = time.time()
 CONFIG_PATH = '/etc/snmp-poller/devices.conf'
 
 log = SNMPPoll.logger.logger
@@ -32,6 +31,7 @@ def poll_device(ip, snmp_community, snmp_version, path):
     :param path: desired graphite path for device
     :type path: str
     '''
+    TIMESTAMP = int(time.time())
     null_ifs = [
         'Null0',
         'NVI0',
@@ -87,28 +87,25 @@ def send_pickle(server, pre_pickle):
     :param pre_pickle: message to send as payload
     :type pre_pickle: any type to be pickled
     '''
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    log.info('Connecting to %s:%d' % server)
+    try:
+        sock.connect(server)
+    except socket.error:
+        log.critical("CRITICAL: Couldn't connect to %s." % server)
 
     payload = pickle.dumps(pre_pickle, protocol=2)
     header = struct.pack('!L', len(payload))
     message = header + payload
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    log.info('Connecting to %s:%d' % server)
-    sock.connect(server)
-    try:
-        message = ''
-        log.info('Beginning data xfer to %s:%d' % server)
-        sock.sendall(message)
+    log.info('Beginning data xfer to %s:%d' % server)
+    log.debug('-' * 80)
+    log.debug(message)
+    log.debug('-' * 80)
+    sock.sendall(message)
 
-        amount_received = 0
-        amount_expected = len(message)
-
-        while amount_received < amount_expected:
-            data = sock.recv(16)
-            amount_received += len(data)
-            log.info('Received %d bytes', len(data))
-    finally:
-        log.info('Xfer completed. Closing socket on %s:%d' % server)
+    log.info('Xfer completed. Closing socket on %s:%d' % server)
+    sock.close()
 
 
 def run():
