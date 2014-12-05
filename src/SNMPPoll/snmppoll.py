@@ -93,11 +93,11 @@ def send_pickle(server, pre_pickle):
     message = header + payload
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    log.debug('Connecting to %s:%d' % server)
+    log.info('Connecting to %s:%d' % server)
     sock.connect(server)
     try:
         message = ''
-        log.debug('Beginning data xfer to %s:%d' % server)
+        log.info('Beginning data xfer to %s:%d' % server)
         sock.sendall(message)
 
         amount_received = 0
@@ -106,9 +106,9 @@ def send_pickle(server, pre_pickle):
         while amount_received < amount_expected:
             data = sock.recv(16)
             amount_received += len(data)
-            log.debug('Received %d bytes', len(data))
+            log.info('Received %d bytes', len(data))
     finally:
-        log.debug('Xfer completed. Closing socket on %s:%d' % server)
+        log.info('Xfer completed. Closing socket on %s:%d' % server)
 
 
 def run():
