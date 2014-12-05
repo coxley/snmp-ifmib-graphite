@@ -18,7 +18,9 @@ building.
 
 Follow the configuration example provided. Section and sub-section names 
 are completely arbritary, but help maintain structure for managing and 
-removing nodes. 
+removing nodes. Do note, however, that a primary section named 'PICKLE' must 
+exist and contain the ``SERVER`` and ``PORT`` values desired for metrics to
+be sent to.
 
 The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out
 for each interface on the device in the operational up(1) state.
