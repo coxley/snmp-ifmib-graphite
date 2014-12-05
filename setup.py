@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
         include_package_data = True,
         name = 'snmp-ifmib-graphite',
-        version = '0.1',
+        version = '0.25',
         author = 'Codey Oxley',
         author_email = 'codey@cwv.net',
         package_dir = {'': 'src',},
