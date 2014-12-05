@@ -33,6 +33,9 @@ if __name__ == "__main__":
         elif 'restart' == sys.argv[1]:
             log.warning('WARNING - Restarting daemon.')
             daemon.restart()
+        elif 'debug' == sys.argv[1]:
+            log.warning('WARNING - Running single debug run')
+            snmppoll.run()
         else:
             print "Unknown command"
             sys.exit(2)

@@ -20,7 +20,7 @@ def get_config(path):
     return ConfigObj(path)
 
 
-def poll_device(ip, snmp_community, snmp_version, path):
+def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     '''Using SNMP, polls single device for ifMIB returning tuple for graphite.
     :param ip: ip of the device
     :type ip: str
@@ -30,6 +30,8 @@ def poll_device(ip, snmp_community, snmp_version, path):
     :type snmp_version: int
     :param path: desired graphite path for device
     :type path: str
+    :param interfaces: ifDescr of interfaces to poll.
+    :type interfaces: list of strings or single str 'all'.
     '''
     TIMESTAMP = int(time.time())
     null_ifs = [
@@ -42,20 +44,41 @@ def poll_device(ip, snmp_community, snmp_version, path):
         load('IF-MIB')
         m = Manager(host=ip, community=snmp_community, version=snmp_version)
     else:
-        log.warning('SNMP: Version not supported for host: %s', ip)
+        log.critical('SNMP: Version not supported for host: %s', ip)
         return False
-    for iface in m.ifIndex:
-        if str(m.ifAdminStatus[iface]) == 'up(1)' and \
-                str(m.ifDescr[iface]) not in null_ifs:
-            interface = m.ifDescr[iface]
-            path_out = '%s.%s.octets_out' % (path, interface)
-            path_in = '%s.%s.octets_in' % (path, interface)
-            out_octets = int(m.ifHCOutOctets[iface])
-            in_octets = int(m.ifHCInOctets[iface])
-            log.debug('%s: out_octets: %s, in_octets: %s',
-                      m.ifDescr[iface], out_octets, in_octets)
-            pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
-            pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
+    if interfaces == 'all':
+        log.info('Polling for interfaces: %s', interfaces)
+        for iface in m.ifIndex:
+            if str(m.ifAdminStatus[iface]) == 'up(1)' and \
+                    str(m.ifDescr[iface]) not in null_ifs:
+                iface_name = str(m.ifDescr[iface]).replace('/', '_')
+                path_out = '%s.%s.octets_out' % (path, iface_name)
+                path_in = '%s.%s.octets_in' % (path, iface_name)
+                out_octets = int(m.ifHCOutOctets[iface])
+                in_octets = int(m.ifHCInOctets[iface])
+                log.debug('%s: out_octets: %s, in_octets: %s',
+                          iface_name, out_octets, in_octets)
+                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
+                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
+    else:
+        if isinstance(interfaces, basestring):
+            interface_tmp = interfaces
+            interfaces = []
+            interfaces.append(interface_tmp)
+        elif isinstance(interfaces, list):
+            log.info('Polling for interfaces: %s', ', '.join(interfaces))
+            if_indexes = \
+                {v: k for k, v in m.ifDescr.iteritems() if v in interfaces}
+            for iface, index in if_indexes.iteritems():
+                iface_name = iface.replace('/', '_')
+                path_out = '%s.%s.octets_out' % (path, iface_name)
+                path_in = '%s.%s.octets_in' % (path, iface_name)
+                out_octets = int(m.ifHCOutOctets[index])
+                in_octets = int(m.ifHCInOctets[index])
+                log.debug('%s: out_octets: %s, in_octets: %s',
+                          iface_name, out_octets, in_octets)
+                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
+                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
     return pickle_tuples
 
 
@@ -73,10 +96,18 @@ def pickle_all(config=get_config(CONFIG_PATH)):
                 ip = sub['IP']
                 snmp_community = sub['SNMP_COMMUNITY']
                 snmp_version = int(sub['SNMP_VERSION'])
-                log.info('Beginning poll of device: %s', ip)
-                pickles = poll_device(ip, snmp_community, snmp_version, path)
-                log.info('Finished polling device: %s', ip)
-                send_pickle(SERVER, pickles)
+                try:
+                    interfaces = sub['INTERFACES']
+                    log.info('Beginning poll of device: %s', ip)
+                    pickles = poll_device(ip, snmp_community, snmp_version,
+                                          path, interfaces)
+                except KeyError:
+                    log.info('Beginning poll of device: %s', ip)
+                    pickles = poll_device(ip, snmp_community, snmp_version,
+                                          path)
+                finally:
+                    log.info('Finished polling device: %s', ip)
+                    send_pickle(SERVER, pickles)
     return True
 
 

@@ -22,8 +22,12 @@ removing nodes. Do note, however, that a primary section named 'PICKLE' must
 exist and contain the ``SERVER`` and ``PORT`` values desired for metrics to
 be sent to.
 
-The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out
-for each interface on the device in the operational up(1) state.
+If ``INTERFACES`` is not defined for a device, by default it will poll all 
+interfaces that report as operationally up.
+
+The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out.
+Interface names will be lowercased and ``/`` subbed for ``_``.
+
 
 After installation, simply call ``snmp-poller.py start`` to start the daemon.
 Logs will automatically rotate up to 5 versions and be stored in 
