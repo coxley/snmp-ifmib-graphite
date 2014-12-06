@@ -3,6 +3,10 @@ Installation
 
 Must have pip installed.
 
+Snimpy_ is a dependency.
+
+__ https://github.com/vincentbernat/snimpy
+
 Clone directory with git or download and extract master tarball/zip.::
 
     $ python setup.py sdist
