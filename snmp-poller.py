@@ -13,6 +13,7 @@ from SNMPPoll import snmppoll
 
 log = logger.logger
 
+
 class SNMPDaemon(Daemon):
     def run(self):
         while True:
