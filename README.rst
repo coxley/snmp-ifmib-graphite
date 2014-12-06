@@ -3,7 +3,7 @@ Installation
 
 Must have pip installed.
 
-Snimpy_ is a dependency.
+`Snimpy`__ is a dependency.
 
 __ https://github.com/vincentbernat/snimpy
 
