@@ -33,11 +33,12 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     :type interfaces: list of strings or single str 'all'.
     '''
     TIMESTAMP = int(time.time())
-    null_ifs = [
+    NULL_IFS = [
         'Null0',
         'NVI0',
         ]
-    carbon_strings = []
+    CARBON_STRINGS = []
+
     if snmp_version == 2:
         load('SNMPv2-MIB')
         load('IF-MIB')
@@ -49,7 +50,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         log.info('Polling for interfaces: %s', interfaces)
         for iface in m.ifIndex:
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
-                    str(m.ifDescr[iface]) not in null_ifs:
+                    str(m.ifDescr[iface]) not in NULL_IFS:
                 iface_name = str(m.ifDescr[iface]).lower()
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
@@ -57,9 +58,9 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 octets_in = int(m.ifHCInOctets[iface])
                 log.debug('%s: octets_out: %s, octets_in: %s',
                           iface_name, octets_out, octets_in)
-                timeseries_out = '%s %s %s' % (path_out, TIMESTAMP, octets_out)
-                timeseries_in = '%s %s %s' % (path_in, TIMESTAMP, octets_in)
-                carbon_strings.extend([timeseries_out, timeseries_in])
+                timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
+                timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
+                CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     else:
         if isinstance(interfaces, basestring):
             interface_tmp = interfaces
@@ -77,10 +78,10 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 octets_in = int(m.ifHCInOctets[index])
                 log.debug('%s: octets_out: %s, octets_in: %s',
                           iface_name, octets_out, octets_in)
-                timeseries_out = '%s %s %s' % (path_out, TIMESTAMP, octets_out)
-                timeseries_in = '%s %s %s' % (path_in, TIMESTAMP, octets_in)
-                carbon_strings.extend([timeseries_out, timeseries_in])
-    return carbon_strings
+                timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
+                timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
+                CARBON_STRINGS.extend([timeseries_out, timeseries_in])
+    return CARBON_STRINGS
 
 
 def carbon_all(config=get_config(CONFIG_PATH)):
@@ -100,12 +101,15 @@ def carbon_all(config=get_config(CONFIG_PATH)):
                 try:
                     interfaces = sub['INTERFACES']
                     log.info('Beginning poll of device: %s', ip)
-                    carbon_data = poll_device(ip, snmp_community, snmp_version,
-                                          path, interfaces)
+                    carbon_data = poll_device(
+                        ip, snmp_community,
+                        snmp_version, path, interfaces)
+
                 except KeyError:
                     log.info('Beginning poll of device: %s', ip)
-                    carbon_data = poll_device(ip, snmp_community, snmp_version,
-                                          path)
+                    carbon_data = poll_device(
+                        ip, snmp_community,
+                        snmp_version, path)
                 finally:
                     log.info('Finished polling device: %s', ip)
                     send_carbon(SERVER, carbon_data)
