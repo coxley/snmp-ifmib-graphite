@@ -58,8 +58,6 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 octets_in = int(m.ifHCInOctets[iface])
                 timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
-                log.debug('Timeseries is: %s', timeseries_out)
-                log.debug('Timeseries is: %s', timeseries_in)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     else:
         if isinstance(interfaces, basestring):
@@ -78,8 +76,6 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 octets_in = int(m.ifHCInOctets[index])
                 timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
-                log.debug('Timeseries is: %s' % timeseries_out)
-                log.debug('Timeseries is: %s' % timeseries_in)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     return CARBON_STRINGS
 
@@ -112,6 +108,7 @@ def carbon_all(config=get_config(CONFIG_PATH)):
                         snmp_version, path)
                 finally:
                     log.info('Finished polling device: %s', ip)
+                    log.debug('Timeseries are: \n%s' % '\n'.join(carbon_data))
                     send_carbon(SERVER, carbon_data)
     return True
 
@@ -131,8 +128,7 @@ def send_carbon(server, timeseries):
         log.critical("CRITICAL: Couldn't connect to %s.",  server)
 
     payload = '\n'.join(timeseries)
-    header = struct.pack('!L', len(payload))
-    message = header + payload
+    message = payload
 
     log.info('Beginning data xfer to %s:%d' % server)
     log.debug('-' * 80)
