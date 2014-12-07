@@ -1,7 +1,6 @@
 import time
 import socket
 import struct
-import pickle
 from snimpy.manager import Manager
 from snimpy.manager import load
 from configobj import ConfigObj
@@ -38,7 +37,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         'Null0',
         'NVI0',
         ]
-    pickle_tuples = []
+    carbon_strings = []
     if snmp_version == 2:
         load('SNMPv2-MIB')
         load('IF-MIB')
@@ -52,14 +51,15 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
                     str(m.ifDescr[iface]) not in null_ifs:
                 iface_name = str(m.ifDescr[iface]).replace('/', '_').lower()
-                path_out = '%s.%s.octets_out' % (path, iface_name)
-                path_in = '%s.%s.octets_in' % (path, iface_name)
-                out_octets = int(m.ifHCOutOctets[iface])
-                in_octets = int(m.ifHCInOctets[iface])
-                log.debug('%s: out_octets: %s, in_octets: %s',
-                          iface_name, out_octets, in_octets)
-                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
-                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
+                path_out = '%s.%s.tx' % (path, iface_name)
+                path_in = '%s.%s.rx' % (path, iface_name)
+                octets_out = int(m.ifHCOutOctets[iface])
+                octets_in = int(m.ifHCInOctets[iface])
+                log.debug('%s: octets_out: %s, octets_in: %s',
+                          iface_name, octets_out, octets_in)
+                timeseries_out = '%s %s %s' % (path_out, TIMESTAMP, octets_out)
+                timeseries_in = '%s %s %s' % (path_in, TIMESTAMP, octets_in)
+                carbon_strings.extend([timeseries_out, timeseries_in])
     else:
         if isinstance(interfaces, basestring):
             interface_tmp = interfaces
@@ -71,52 +71,53 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 {v: k for k, v in m.ifDescr.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
                 iface_name = iface.replace('/', '_').lower()
-                path_out = '%s.%s.octets_out' % (path, iface_name)
-                path_in = '%s.%s.octets_in' % (path, iface_name)
-                out_octets = int(m.ifHCOutOctets[index])
-                in_octets = int(m.ifHCInOctets[index])
-                log.debug('%s: out_octets: %s, in_octets: %s',
-                          iface_name, out_octets, in_octets)
-                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
-                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
-    return pickle_tuples
+                path_out = '%s.%s.tx' % (path, iface_name)
+                path_in = '%s.%s.rx' % (path, iface_name)
+                octets_out = int(m.ifHCOutOctets[index])
+                octets_in = int(m.ifHCInOctets[index])
+                log.debug('%s: octets_out: %s, octets_in: %s',
+                          iface_name, octets_out, octets_in)
+                timeseries_out = '%s %s %s' % (path_out, TIMESTAMP, octets_out)
+                timeseries_in = '%s %s %s' % (path_in, TIMESTAMP, octets_in)
+                carbon_strings.extend([timeseries_out, timeseries_in])
+    return carbon_strings
 
 
-def pickle_all(config=get_config(CONFIG_PATH)):
-    '''Creates pickle for each device configured and calls send_pickle()
+def carbon_all(config=get_config(CONFIG_PATH)):
+    '''Creates carbon for each device configured and calls send_carbon()
     :param config: configuration options for devices
     :param type: dict
     '''
-    SERVER = (config['PICKLE']['SERVER'], int(config['PICKLE']['PORT']))
+    SERVER = (config['CARBON']['SERVER'], int(config['CARBON']['PORT']))
     for section in config:
-        if section != 'PICKLE':
+        if section != 'CARBON':
             for subsection in config[section]:
                 sub = config[section][subsection]
-                path = sub['GRAPHITE_PATH']
+                path = sub['METRIC_PATH']
                 ip = sub['IP']
                 snmp_community = sub['SNMP_COMMUNITY']
                 snmp_version = int(sub['SNMP_VERSION'])
                 try:
                     interfaces = sub['INTERFACES']
                     log.info('Beginning poll of device: %s', ip)
-                    pickles = poll_device(ip, snmp_community, snmp_version,
+                    carbon_data = poll_device(ip, snmp_community, snmp_version,
                                           path, interfaces)
                 except KeyError:
                     log.info('Beginning poll of device: %s', ip)
-                    pickles = poll_device(ip, snmp_community, snmp_version,
+                    carbon_data = poll_device(ip, snmp_community, snmp_version,
                                           path)
                 finally:
                     log.info('Finished polling device: %s', ip)
-                    send_pickle(SERVER, pickles)
+                    send_carbon(SERVER, carbon_data)
     return True
 
 
-def send_pickle(server, pre_pickle):
-    '''Open socket and send pickle as packet.
+def send_carbon(server, timeseries):
+    '''Open socket and send carbon as packet.
     :param server: server and port to connect to
     :type server: tuple with server as str and port as int
-    :param pre_pickle: message to send as payload
-    :type pre_pickle: any type to be pickled
+    :param timeseries: list of timeseries to send
+    :type timeseries: list of str
     '''
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     log.info('Connecting to %s:%d' % server)
@@ -125,7 +126,7 @@ def send_pickle(server, pre_pickle):
     except socket.error:
         log.critical("CRITICAL: Couldn't connect to %s." % server)
 
-    payload = pickle.dumps(pre_pickle, protocol=2)
+    payload = '\n'.join(timeseries)
     header = struct.pack('!L', len(payload))
     message = header + payload
 
@@ -143,4 +144,4 @@ def run():
     '''Initiate the process.
     :params: none
     '''
-    return pickle_all()
+    return carbon_all()
