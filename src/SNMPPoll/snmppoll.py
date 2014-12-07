@@ -42,7 +42,12 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     if snmp_version == 2:
         load('SNMPv2-MIB')
         load('IF-MIB')
-        m = Manager(host=ip, community=snmp_community, version=snmp_version)
+        try:
+            m = Manager(
+                host=ip, community=snmp_community, version=snmp_version
+                )
+        except socket.gaierror, error:
+            log.critical('SNMP: Error raised for host: %s - %s', ip, error)
     else:
         log.critical('SNMP: Version not supported for host: %s', ip)
         return False
