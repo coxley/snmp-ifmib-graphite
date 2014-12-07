@@ -20,7 +20,7 @@ class SNMPDaemon(Daemon):
             log.info('--- Polling devices ---')
             snmppoll.run()
             log.info('--- Finished polling ---')
-            time.sleep(60)
+            time.sleep(30)
 
 if __name__ == "__main__":
     daemon = SNMPDaemon('/tmp/snmp-poller.pid')

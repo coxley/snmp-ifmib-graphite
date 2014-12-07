@@ -1,6 +1,5 @@
 import time
 import socket
-import struct
 from snimpy.manager import Manager
 from snimpy.manager import load
 from configobj import ConfigObj
@@ -45,7 +44,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         m = Manager(host=ip, community=snmp_community, version=snmp_version)
     else:
         log.critical('SNMP: Version not supported for host: %s', ip)
-        return False
+        return
     if interfaces == 'all':
         log.info('Polling for interfaces: %s', interfaces)
         for iface in m.ifIndex:
