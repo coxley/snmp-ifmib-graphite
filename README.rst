@@ -64,3 +64,14 @@ After installation, simply call ``snmp-poller.py start`` to start the daemon.
 Logs will automatically rotate up to 5 versions and be stored in 
 ``~/.snmp-poller/snmp-poller.log``.
 
+Note
+====
+
+Daemon will not contiune running for exceptions unhandled. Any exception thrown
+by the main snmp poller should be captured and logged to log file. Do note, 
+however, that if you set a log path that doesn't exist and user daemon is 
+running as lacks sufficient permissions to create it, OSError will be raised
+and currently I'm not handling that.
+
+As long as the path is where the user has permissions to create files/dirs,
+it shouldn't matter if it exists yet or not.
