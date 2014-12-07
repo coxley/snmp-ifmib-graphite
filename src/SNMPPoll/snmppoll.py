@@ -1,6 +1,5 @@
 import time
 import socket
-import struct
 import pickle
 from snimpy.snmp import SNMPException
 from snimpy.manager import Manager
@@ -48,8 +47,8 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         log.critical('SNMP: Version not supported for host: %s', ip)
         return False
     try:
-        sys_desc = str(m._sysDescr)
-    except snimpy.snmp.SNMPException:
+        str(m._sysDescr)
+    except SNMPException:
         log.critical('SNMP: Cannot poll host: %s - Is it restricted?', ip)
         return False
     if interfaces == 'all':
@@ -102,20 +101,16 @@ def pickle_all(config=get_config(CONFIG_PATH)):
                 ip = sub['IP']
                 snmp_community = sub['SNMP_COMMUNITY']
                 snmp_version = int(sub['SNMP_VERSION'])
-                try:
-                    interfaces = sub['INTERFACES']
-                except KeyError:
-                    interfaces = 'all'
-                finally:
-                    log.info('Beginning poll of device: %s', ip)
-                    carbon_data = poll_device(
-                        ip, snmp_community,
-                        snmp_version, path, interfaces)
-                    if carbon_data is False:
-                        continue
-                    log.info('Finished polling device: %s', ip)
-                    log.debug('Timeseries are: \n%s' % '\n'.join(carbon_data))
-                    send_carbon(SErver, CARbon_data)
+                interfaces = sub.get('INTERFACES', 'all')
+                log.info('Beginning poll of device: %s', ip)
+                pickle_data = poll_device(
+                    ip, snmp_community,
+                    snmp_version, path, interfaces)
+                if pickle_data is False:
+                    continue
+                log.info('Finished polling device: %s', ip)
+                log.debug('Timeseries are: \n%s' % '\n'.join(pickle_data))
+                send_pickle(SERVER, pickle_data)
     return True
 
 
