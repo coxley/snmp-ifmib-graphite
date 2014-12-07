@@ -47,14 +47,14 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 host=ip, community=snmp_community, version=snmp_version
                 )
         except socket.gaierror, error:
-            log.critical('SNMP: Error raised for host: %s - %s', ip, error)
+            log.error('SNMP: Error raised for host: %s - %s', ip, error)
     else:
-        log.critical('SNMP: Version not supported for host: %s', ip)
+        log.error('SNMP: Version not supported for host: %s', ip)
         return False
     try:
         str(m._sysDescr)
     except SNMPException:
-        log.critical('SNMP: Cannot poll host: %s - Is it restricted?', ip)
+        log.error('SNMP: Cannot poll host: %s - Is it restricted?', ip)
         return False
     if interfaces == 'all':
         log.info('Polling for interfaces: %s', interfaces)

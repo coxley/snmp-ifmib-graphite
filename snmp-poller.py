@@ -18,7 +18,10 @@ class SNMPDaemon(Daemon):
     def run(self):
         while True:
             log.info('--- Polling devices ---')
-            snmppoll.run()
+            try:
+                snmppoll.run()
+            except:
+                log.critical('Unexpected error:', sys.exc_info()[0])
             log.info('--- Finished polling ---')
             time.sleep(60)
 
