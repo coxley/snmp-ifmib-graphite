@@ -12,6 +12,13 @@ Description
 Will poll interface octets for devices listed in config file and send
 time series to a carbon server serialized as pickle object.
 
+For preserving forward slashes and sending in plain-text carbon, see branch
+`carbon-no-pickle`__. Modified for purpose of sending to influxdb via carbon
+but will work with any carbon server seeing that storage backend supports 
+forward slashes.
+
+__ https://github.com/coxley/snmp-ifmib-graphite/tree/carbon-no-pickle
+
 Installation
 ============
 
