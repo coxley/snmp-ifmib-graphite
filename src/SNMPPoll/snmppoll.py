@@ -56,10 +56,10 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[iface])
                 octets_in = int(m.ifHCInOctets[iface])
-                log.debug('%s: octets_out: %s, octets_in: %s',
-                          iface_name, octets_out, octets_in)
                 timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
+                log.debug('Timeseries is: %s', timeseries_out)
+                log.debug('Timeseries is: %s', timeseries_in)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     else:
         if isinstance(interfaces, basestring):
@@ -76,10 +76,10 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[index])
                 octets_in = int(m.ifHCInOctets[index])
-                log.debug('%s: octets_out: %s, octets_in: %s',
-                          iface_name, octets_out, octets_in)
                 timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
+                log.debug('Timeseries is: %s' % timeseries_out)
+                log.debug('Timeseries is: %s' % timeseries_in)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     return CARBON_STRINGS
 
@@ -128,7 +128,7 @@ def send_carbon(server, timeseries):
     try:
         sock.connect(server)
     except socket.error:
-        log.critical("CRITICAL: Couldn't connect to %s." % server)
+        log.critical("CRITICAL: Couldn't connect to %s.",  server)
 
     payload = '\n'.join(timeseries)
     header = struct.pack('!L', len(payload))
