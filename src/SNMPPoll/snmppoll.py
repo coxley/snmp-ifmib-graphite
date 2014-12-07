@@ -123,11 +123,10 @@ def send_pickle(server, pre_pickle):
     try:
         sock.connect(server)
     except socket.error:
-        log.critical("CRITICAL: Couldn't connect to %s." % server)
+        log.critical("CRITICAL: Couldn't connect to %s.", server)
 
     payload = pickle.dumps(pre_pickle, protocol=2)
-    header = struct.pack('!L', len(payload))
-    message = header + payload
+    message = payload
 
     log.info('Beginning data xfer to %s:%d' % server)
     log.debug('-' * 80)
