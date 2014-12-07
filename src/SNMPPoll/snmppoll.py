@@ -1,5 +1,6 @@
 import time
 import socket
+from snimpy.snmp import SNMPException
 from snimpy.manager import Manager
 from snimpy.manager import load
 from configobj import ConfigObj
@@ -44,7 +45,12 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         m = Manager(host=ip, community=snmp_community, version=snmp_version)
     else:
         log.critical('SNMP: Version not supported for host: %s', ip)
-        return
+        return False
+    try:
+        sys_desc = str(m.sysDescr)
+    except snimpy.snmp.SNMPException:
+        log.critical('SNMP: Cannot poll host: %s - Is it restricted?', ip)
+        return False
     if interfaces == 'all':
         log.info('Polling for interfaces: %s', interfaces)
         for iface in m.ifIndex:
@@ -95,20 +101,18 @@ def carbon_all(config=get_config(CONFIG_PATH)):
                 snmp_version = int(sub['SNMP_VERSION'])
                 try:
                     interfaces = sub['INTERFACES']
+                except KeyError:
+                    interfaces = 'all'
+                finally:
                     log.info('Beginning poll of device: %s', ip)
                     carbon_data = poll_device(
                         ip, snmp_community,
                         snmp_version, path, interfaces)
-
-                except KeyError:
-                    log.info('Beginning poll of device: %s', ip)
-                    carbon_data = poll_device(
-                        ip, snmp_community,
-                        snmp_version, path)
-                finally:
+                    if carbon_data is False:
+                        continue
                     log.info('Finished polling device: %s', ip)
                     log.debug('Timeseries are: \n%s' % '\n'.join(carbon_data))
-                    send_carbon(SERVER, carbon_data)
+                    send_carbon(SErver, CARbon_data)
     return True
 
 
