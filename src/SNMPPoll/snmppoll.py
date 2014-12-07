@@ -107,6 +107,7 @@ def pickle_all(config=get_config(CONFIG_PATH)):
                                           path)
                 finally:
                     log.info('Finished polling device: %s', ip)
+                    log.debug('Timeseries are: \n%s' % '\n'.join(carbon_data))
                     send_pickle(SERVER, pickles)
     return True
 
