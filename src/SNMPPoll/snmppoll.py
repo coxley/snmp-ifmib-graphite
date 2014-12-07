@@ -52,14 +52,14 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
                     str(m.ifDescr[iface]) not in null_ifs:
                 iface_name = str(m.ifDescr[iface]).replace('/', '_').lower()
-                path_out = '%s.%s.octets_out' % (path, iface_name)
-                path_in = '%s.%s.octets_in' % (path, iface_name)
-                out_octets = int(m.ifHCOutOctets[iface])
-                in_octets = int(m.ifHCInOctets[iface])
-                log.debug('%s: out_octets: %s, in_octets: %s',
-                          iface_name, out_octets, in_octets)
-                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
-                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
+                path_out = '%s.%s.tx' % (path, iface_name)
+                path_in = '%s.%s.rx' % (path, iface_name)
+                octets_out = int(m.ifHCOutOctets[iface])
+                octets_in = int(m.ifHCInOctets[iface])
+                log.debug('%s: octets_out: %s, octets_in: %s',
+                          iface_name, octets_out, octets_in)
+                pickle_tuples.append((path_out, (TIMESTAMP, octets_out)))
+                pickle_tuples.append((path_in, (TIMESTAMP, octets_in)))
     else:
         if isinstance(interfaces, basestring):
             interface_tmp = interfaces
@@ -71,14 +71,14 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 {v: k for k, v in m.ifDescr.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
                 iface_name = iface.replace('/', '_').lower()
-                path_out = '%s.%s.octets_out' % (path, iface_name)
-                path_in = '%s.%s.octets_in' % (path, iface_name)
-                out_octets = int(m.ifHCOutOctets[index])
-                in_octets = int(m.ifHCInOctets[index])
-                log.debug('%s: out_octets: %s, in_octets: %s',
-                          iface_name, out_octets, in_octets)
-                pickle_tuples.append((path_out, (TIMESTAMP, out_octets)))
-                pickle_tuples.append((path_in, (TIMESTAMP, in_octets)))
+                path_out = '%s.%s.tx' % (path, iface_name)
+                path_in = '%s.%s.rx' % (path, iface_name)
+                octets_out = int(m.ifHCOutOctets[index])
+                octets_in = int(m.ifHCInOctets[index])
+                log.debug('%s: octets_out: %s, octets_in: %s',
+                          iface_name, octets_out, octets_in)
+                pickle_tuples.append((path_out, (TIMESTAMP, octets_out)))
+                pickle_tuples.append((path_in, (TIMESTAMP, octets_in)))
     return pickle_tuples
 
 
@@ -92,7 +92,7 @@ def pickle_all(config=get_config(CONFIG_PATH)):
         if section != 'PICKLE':
             for subsection in config[section]:
                 sub = config[section][subsection]
-                path = sub['GRAPHITE_PATH']
+                path = sub['METRIC_PATH']
                 ip = sub['IP']
                 snmp_community = sub['SNMP_COMMUNITY']
                 snmp_version = int(sub['SNMP_VERSION'])

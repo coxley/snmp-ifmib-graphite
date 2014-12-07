@@ -1,3 +1,17 @@
+
+* Contents:
+
+  + 1 Description_
+  + 2 Installation_
+  + 3 Usage_
+
+
+Description
+===========
+
+Will poll interface octets for devices listed in config file and send
+time series to a carbon server serialized as pickle object.
+
 Installation
 ============
 
@@ -22,21 +36,31 @@ building.
 
 Follow the configuration example provided. Section and sub-section names 
 are completely arbritary, but help maintain structure for managing and 
-removing nodes. Do note, however, that a primary section named 'PICKLE' must 
+removing nodes. Do note, however, that a primary section named ``CARBON`` must 
 exist and contain the ``SERVER`` and ``PORT`` values desired for metrics to
 be sent to.
 
 If ``INTERFACES`` is not defined for a device, by default it will poll all 
 interfaces that report as operationally up.
 
-The ``PATH`` attribute will be appended with ifDescr and octets_in/octets_out.
-Interface names will be lowercased and ``/`` subbed for ``_``. 
+The ``METRIC_PATH`` attribute will be appended with ifDescr and rx/tx.
+Interface names will be lowercased and ``/`` subbed with ``_``. This is due to 
+a limitation of whisper storing metrics as file system paths. Branch 
+`carbon-no-pickle`__ keeps ``/`` intact due to primary intent to push to
+influxdb in carbon format.
 
-Path I'm using is: ``customers.<group>.<customer>.devices.<device-type>.<device>``
-and it will end up looking like:
-``customers.<group>.<customer>.devices.<device-type>.<device>.<interface>.<sub-if>``
+If you use a path of::
+    
+    core.hq.switches.test-sw
+
+it will end up having timeseries of::
+
+    core.hq.switches.test-sw.gigabitethernet7_25.rx
+    core.hq.switches.test-sw.gigabitethernet7_25.tx
+
 
 
 After installation, simply call ``snmp-poller.py start`` to start the daemon.
 Logs will automatically rotate up to 5 versions and be stored in 
 ``~/.snmp-poller/snmp-poller.log``.
+
