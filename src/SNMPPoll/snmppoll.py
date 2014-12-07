@@ -91,7 +91,7 @@ def carbon_all(config=get_config(CONFIG_PATH)):
     '''
     SERVER = (config['CARBON']['SERVER'], int(config['CARBON']['PORT']))
     for section in config:
-        if section != 'CARBON':
+        if section not in ['CARBON', 'LOGGING']:
             for subsection in config[section]:
                 sub = config[section][subsection]
                 path = sub['METRIC_PATH']
