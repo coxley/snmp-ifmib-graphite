@@ -9,6 +9,9 @@ try:
 except KeyError:
     LOG_PATH = '~/.snmp-poller'
 
+if not os.path.exists(LOG_PATH):
+    os.makedirs(LOG_PATH)
+
 format = logging.Formatter('%(asctime)s: %(message)s')
 log_file = os.path.join(os.path.expanduser(LOG_PATH), 'snmp-poller.log')
 logger = logging.getLogger('snmp-poller')
