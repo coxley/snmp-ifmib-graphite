@@ -1,3 +1,16 @@
+Description
+===========
+
+Will poll interface octets for devices listed in config file and send time 
+series to carbon server in plain-text format. Intended for builds where 
+storage backend is not whisper or any other that stores metrics as filesystem
+paths. This is only because forward slashes are preserved in the metric name.
+
+For whisper compatible version, look at `master`__. Note that it will serialize
+data in pickle format.
+
+__ https://github.com/coxley/snmp-ifmib-graphite/tree/master
+
 Installation
 ============
 
