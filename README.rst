@@ -21,7 +21,7 @@ Must have pip installed.
 
 __ https://github.com/vincentbernat/snimpy
 
-Clone directory with git or download and extract master tarball/zip.::
+Clone directory with git or download and extract master tarball/zip::
 
     $ python setup.py sdist
     $ pip install https://github.com/coxley/snmp-ifmib-graphite/archive/master.zip
