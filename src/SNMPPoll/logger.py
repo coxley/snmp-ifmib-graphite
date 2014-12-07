@@ -1,10 +1,16 @@
 import os
 import logging
 import logging.handlers
+from configobj import ConfigObj
 
+
+try:
+    LOG_PATH = ConfigObj('/etc/snmp-poller/devices.conf')['LOGGING']['PATH']
+except KeyError:
+    LOG_PATH = '~/.snmp-poller'
 
 format = logging.Formatter('%(asctime)s: %(message)s')
-log_file = os.path.expanduser('~/.snmp-poller/snmp-poller.log')
+log_file = os.path.join(os.path.expanduser(LOG_PATH), 'snmp-poller.log')
 logger = logging.getLogger('snmp-poller')
 #logger.setLevel(logging.DEBUG)
 logger.setLevel(logging.INFO)
