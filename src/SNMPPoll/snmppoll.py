@@ -1,5 +1,6 @@
 import time
 import socket
+import re
 from snimpy.snmp import SNMPException
 from snimpy.manager import Manager
 from snimpy.manager import load
