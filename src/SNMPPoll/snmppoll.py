@@ -63,7 +63,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         for iface in m.ifIndex:
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
                     str(m.ifName[iface]) not in NULL_IFS:
-                iface_name = str(m.ifName[iface]).lower()
+                iface_name = normalize_ifname(str(m.ifName[iface]))
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[iface])
@@ -71,6 +71,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 timeseries_out = '%s %s %s' % (path_out, octets_out, TIMESTAMP)
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
+    # Need to combine most of this if/els together. Too much being repeated..
     else:
         if isinstance(interfaces, basestring):
             interface_tmp = interfaces
@@ -81,7 +82,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
             if_indexes = \
                 {v: k for k, v in m.ifName.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
-                iface_name = iface.lower()
+                iface_name = normalize_ifname(str(iface))
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[index])
@@ -90,6 +91,20 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                 timeseries_in = '%s %s %s' % (path_in, octets_in, TIMESTAMP)
                 CARBON_STRINGS.extend([timeseries_out, timeseries_in])
     return CARBON_STRINGS
+
+
+def normalize_ifname(ifname):
+    '''Normalizes interfaces for two letter abbreviation and number appended.
+    :param ifname: interface name
+    :param type: str
+    '''
+    m = re.match(r'(?P<name>.*?) *(?P<numbers>[0-9-:./]*$)', ifname)
+    numbers = m.group('numbers')
+    if not numbers:
+        name = m.group('name').lower()
+    else:
+        name = m.group('name')[0:2].lower()
+    return '{}{}'.format(name, numbers)
 
 
 def carbon_all(config=get_config(CONFIG_PATH)):
