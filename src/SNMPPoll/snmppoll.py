@@ -36,8 +36,8 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     '''
     TIMESTAMP = int(time.time())
     NULL_IFS = [
-        'Null0',
-        'NVI0',
+        'Nu0',
+        'NV0',
         ]
     CARBON_STRINGS = []
 
