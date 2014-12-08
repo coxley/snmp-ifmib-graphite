@@ -30,7 +30,9 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     :type snmp_version: int
     :param path: desired graphite path for device
     :type path: str
-    :param interfaces: ifDescr of interfaces to poll.
+    :param interfaces: **ifName** of interfaces to poll. Careful because this
+                       value can be different even within the same vendor. 
+                       Cisco ASA will return full iface name while IOS abbrev.
     :type interfaces: list of strings or single str 'all'.
     '''
     TIMESTAMP = int(time.time())
@@ -60,8 +62,8 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         log.info('Polling for interfaces: %s', interfaces)
         for iface in m.ifIndex:
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
-                    str(m.ifDescr[iface]) not in null_ifs:
-                iface_name = str(m.ifDescr[iface]).replace('/', '_').lower()
+                    str(m.ifName[iface]) not in null_ifs:
+                iface_name = str(m.ifName[iface]).replace('/', '_').lower()
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[iface])
@@ -78,7 +80,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         elif isinstance(interfaces, list):
             log.info('Polling for interfaces: %s', ', '.join(interfaces))
             if_indexes = \
-                {v: k for k, v in m.ifDescr.iteritems() if v in interfaces}
+                {v: k for k, v in m.ifName.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
                 iface_name = iface.replace('/', '_').lower()
                 path_out = '%s.%s.tx' % (path, iface_name)
