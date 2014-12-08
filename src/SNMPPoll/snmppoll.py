@@ -1,5 +1,6 @@
 import time
 import socket
+import re
 import pickle
 from snimpy.snmp import SNMPException
 from snimpy.manager import Manager
