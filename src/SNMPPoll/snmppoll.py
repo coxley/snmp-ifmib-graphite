@@ -63,7 +63,8 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
         for iface in m.ifIndex:
             if str(m.ifAdminStatus[iface]) == 'up(1)' and \
                     str(m.ifName[iface]) not in null_ifs:
-                iface_name = str(m.ifName[iface]).replace('/', '_').lower()
+                iface_name = normalize_ifname(str(m.ifName[iface]).
+                                              replace('/', '_'))
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[iface])
@@ -72,6 +73,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
                           iface_name, octets_out, octets_in)
                 pickle_tuples.append((path_out, (TIMESTAMP, octets_out)))
                 pickle_tuples.append((path_in, (TIMESTAMP, octets_in)))
+    # Need to combine if statements
     else:
         if isinstance(interfaces, basestring):
             interface_tmp = interfaces
@@ -82,7 +84,7 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
             if_indexes = \
                 {v: k for k, v in m.ifName.iteritems() if v in interfaces}
             for iface, index in if_indexes.iteritems():
-                iface_name = iface.replace('/', '_').lower()
+                iface_name = normalize_ifname(iface.replace('/', '_'))
                 path_out = '%s.%s.tx' % (path, iface_name)
                 path_in = '%s.%s.rx' % (path, iface_name)
                 octets_out = int(m.ifHCOutOctets[index])
@@ -94,6 +96,20 @@ def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
     return pickle_tuples
 
 
+def normalize_ifname(ifname):
+    '''Normalizes interfaces for two letter abbreviation and number appended.
+    :param ifname: interface name
+    :param type: str
+    '''
+    m = re.match(r'(?P<name>.*?) *(?P<numbers>[0-9-:./]*$)', ifname)
+    numbers = m.group('numbers')
+    if not numbers:
+        name = m.group('name').lower()
+    else:
+        name = m.group('name')[0:2].lower()
+    return '{}{}'.format(name, numbers)
+
+
 def pickle_all(config=get_config(CONFIG_PATH)):
     '''Creates pickle for each device configured and calls send_pickle()
     :param config: configuration options for devices
@@ -101,7 +117,7 @@ def pickle_all(config=get_config(CONFIG_PATH)):
     '''
     SERVER = (config['PICKLE']['SERVER'], int(config['PICKLE']['PORT']))
     for section in config:
-        if section != 'PICKLE':
+        if section != ['PICKLE','LOGGING']:
             for subsection in config[section]:
                 sub = config[section][subsection]
                 path = sub['METRIC_PATH']
