@@ -23,7 +23,7 @@ class SNMPDaemon(Daemon):
             except:
                 log.critical('Unexpected error:', sys.exc_info()[0])
             log.info('--- Finished polling ---')
-            time.sleep(60)
+            time.sleep(300)
 
 if __name__ == "__main__":
     daemon = SNMPDaemon('/tmp/snmp-poller.pid')
