@@ -4,7 +4,7 @@ demos/
 *syncthing*
 *.mo
 *.egg-info
-*.idea
+.idea
 *.egg
 *.EGG
 *.EGG-INFO
