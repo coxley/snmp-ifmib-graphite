@@ -1,3 +1,5 @@
+import os
+import glob
 import time
 import socket
 import re
@@ -7,17 +9,35 @@ from snimpy.manager import load
 from configobj import ConfigObj
 import SNMPPoll.logger
 
-CONFIG_PATH = '/etc/snmp-poller/devices.conf'
+CONFIG_PATH = '/etc/snmp-poller'
 
 log = SNMPPoll.logger.logger
 
 
 def get_config(path):
-    '''Return dict created from ConfigObj
-    :param path: path to config file
-    :param type: str
+    '''Return ConfigObj dict of primary .conf merged with $path/conf.d/*.conf
+    :param path: path to parent config directory
+    :type path: str
+    :example path: /etc/snmp-poller
     '''
-    return ConfigObj(path)
+    config_file = os.path.join(path, 'devices.conf')
+    config_obj = ConfigObj(config_file)
+    config_obj.merge(config_inclusion(path))
+    return config_obj
+
+
+def config_inclusion(parent_dir):
+    '''Return merged ConfigObj object of all config files under $PARENT/conf.d
+    :param parent_dir: The parent dir of where conf.d resides.
+    :type parent_dir: str
+    :example parent_dir: /etc/snmp-poller
+    '''
+    include = os.path.join('{}'.format(parent_dir), 'conf.d/*.conf')
+    configs = [ConfigObj(cfg) for cfg in glob.iglob(include)]
+    configuration = ConfigObj()
+    for config_file in configs:
+        configuration.merge(config_file)
+    return configuration
 
 
 def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):

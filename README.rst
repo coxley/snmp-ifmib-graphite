@@ -59,6 +59,10 @@ After installation, simply call ``snmp-poller.py start`` to start the daemon.
 Logs will automatically rotate up to 5 versions and be stored in 
 ``~/.snmp-poller/snmp-poller.log``.
 
+Configuration files can be logically separated into a ``$CONFDIR/conf.d``
+directory. Extension must end with ``.conf`` and follow same format as
+the main config file.
+
 Note
 ====
 
