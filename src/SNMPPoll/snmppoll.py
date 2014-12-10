@@ -1,43 +1,14 @@
-import os
-import glob
 import time
 import socket
 import re
 from snimpy.snmp import SNMPException
 from snimpy.manager import Manager
 from snimpy.manager import load
-from configobj import ConfigObj
-import SNMPPoll.logger
+from SNMPPoll import logger, config
 
 CONFIG_PATH = '/etc/snmp-poller'
 
-log = SNMPPoll.logger.logger
-
-
-def get_config(path):
-    '''Return ConfigObj dict of primary .conf merged with $path/conf.d/*.conf
-    :param path: path to parent config directory
-    :type path: str
-    :example path: /etc/snmp-poller
-    '''
-    config_file = os.path.join(path, 'devices.conf')
-    config_obj = ConfigObj(config_file)
-    config_obj.merge(config_inclusion(path))
-    return config_obj
-
-
-def config_inclusion(parent_dir):
-    '''Return merged ConfigObj object of all config files under $PARENT/conf.d
-    :param parent_dir: The parent dir of where conf.d resides.
-    :type parent_dir: str
-    :example parent_dir: /etc/snmp-poller
-    '''
-    include = os.path.join('{}'.format(parent_dir), 'conf.d/*.conf')
-    configs = [ConfigObj(cfg) for cfg in glob.iglob(include)]
-    configuration = ConfigObj()
-    for config_file in configs:
-        configuration.merge(config_file)
-    return configuration
+log = logger.logger
 
 
 def poll_device(ip, snmp_community, snmp_version, path, interfaces='all'):
@@ -128,21 +99,21 @@ def normalize_ifname(ifname):
     return '{}{}'.format(name, numbers)
 
 
-def carbon_all(config=get_config(CONFIG_PATH)):
+def carbon_all(config=config.get_config(CONFIG_PATH)):
     '''Creates carbon for each device configured and calls send_carbon()
     :param config: configuration options for devices
     :param type: dict
     '''
-    SERVER = (config['CARBON']['SERVER'], int(config['CARBON']['PORT']))
+    server = (config['carbon']['server'], int(config['carbon']['port']))
     for section in config:
-        if section not in ['CARBON', 'LOGGING']:
+        if section not in ['carbon', 'logging']:
             for subsection in config[section]:
                 sub = config[section][subsection]
-                path = sub['METRIC_PATH']
-                ip = sub['IP']
-                snmp_community = sub['SNMP_COMMUNITY']
-                snmp_version = int(sub['SNMP_VERSION'])
-                interfaces = sub.get('INTERFACES', 'all')
+                path = sub['metric_path']
+                ip = sub['ifaddr']
+                snmp_community = sub['snmp_community']
+                snmp_version = int(sub['snmp_version'])
+                interfaces = sub.get('ifaces', 'all')
                 log.info('Beginning poll of device: %s', ip)
                 carbon_data = poll_device(
                     ip, snmp_community,
@@ -151,7 +122,7 @@ def carbon_all(config=get_config(CONFIG_PATH)):
                     continue
                 log.info('Finished polling device: %s', ip)
                 log.debug('Timeseries are: \n%s' % '\n'.join(carbon_data))
-                send_carbon(SERVER, carbon_data)
+                send_carbon(server, carbon_data)
     return True
 
 

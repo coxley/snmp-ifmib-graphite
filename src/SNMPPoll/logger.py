@@ -1,10 +1,11 @@
 import os
 import logging
 import logging.handlers
-from configobj import ConfigObj
+import yaml
 
 try:
-    LOG_PATH = ConfigObj('/etc/snmp-poller/devices.conf')['LOGGING']['PATH']
+    with open('/etc/snmp-poller/snmp-poller.yml') as f:
+        LOG_PATH = yaml.load(f)['logging']['path']
 except KeyError:
     LOG_PATH = '~/.snmp-poller'
 

@@ -29,7 +29,7 @@ if __name__ == "__main__":
     daemon = SNMPDaemon('/tmp/snmp-poller.pid')
     if len(sys.argv) == 2:
         if 'start' == sys.argv[1]:
-            log.warning('WARNING -Starting daemon.')
+            log.warning('WARNING - Starting daemon.')
             daemon.start()
         elif 'stop' == sys.argv[1]:
             log.warning('WARNING - Stopping daemon')

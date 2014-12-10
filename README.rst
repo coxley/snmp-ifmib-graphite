@@ -30,20 +30,20 @@ Clone directory with git or download and extract carbon-no-pickle tarball/zip::
 Usage
 =====
 
-Will look for configuration at ``/etc/snmp-poller/devices.conf`` by default.
+Will look for configuration at ``/etc/snmp-poller/snmp-poller.yml`` by default.
 To modify, edit ``config_file`` variable in ``src/snmppoll.py`` before
 building.
 
 Follow the configuration example provided. Section and sub-section names 
 are completely arbritary, but help maintain structure for managing and 
-removing nodes. Do note, however, that a primary section named ``CARBON`` must 
-exist and contain the ``SERVER`` and ``PORT`` values desired for metrics to
+removing nodes. Do note, however, that a primary section named ``carbon`` must 
+exist and contain the ``server`` and ``port`` values desired for metrics to
 be sent to.
 
-If ``INTERFACES`` is not defined for a device, by default it will poll all 
+If ``ifaces`` is not defined for a device, by default it will poll all 
 interfaces that report as operationally up.
 
-The ``METRIC_PATH`` attribute will be appended with ifDescr and rx/tx.
+The ``metric_path`` attribute will be appended with ifDescr and rx/tx.
 Interface names will be lowercased.
 
 If you use a path of::
@@ -60,7 +60,7 @@ Logs will automatically rotate up to 5 versions and be stored in
 ``~/.snmp-poller/snmp-poller.log``.
 
 Configuration files can be logically separated into a ``$CONFDIR/conf.d``
-directory. Extension must end with ``.conf`` and follow same format as
+directory. Extension must end with ``.yml`` and follow same format as
 the main config file.
 
 Note
