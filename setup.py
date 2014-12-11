@@ -9,7 +9,7 @@ setup(
         author_email = 'codey@cwv.net',
         package_dir = {'': 'src',},
         packages = find_packages('src'),
-        install_requires = ['nose', 'snimpy >=0.8.3', 'configobj >=4.7.1',],
+        install_requires = ['nose', 'snimpy >=0.8.3', 'pyyaml',],
         scripts = ['snmp-poller.py'],
         setup_requires = ['setuptools_git >=0.3'],
         description = '''Configurable SNMP poller for ifMIB data.
