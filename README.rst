@@ -7,11 +7,6 @@ series to carbon server in plain-text format. Intended for builds where
 storage backend is not whisper or any other that stores metrics as filesystem
 paths. This is only because forward slashes are preserved in the metric name.
 
-For whisper compatible version, look at `master`__. Note that it will serialize
-data in pickle format.
-
-__ https://github.com/coxley/snmp-ifmib-graphite/tree/master
-
 Installation
 ============
 
@@ -21,10 +16,10 @@ Must have pip installed.
 
 __ https://github.com/vincentbernat/snimpy
 
-Clone directory with git or download and extract carbon-no-pickle tarball/zip::
+Use pip to install directly from git::
 
     $ python setup.py sdist
-    $ pip install https://github.com/coxley/snmp-ifmib-graphite/archive/carbon-no-pickle.zip
+    $ pip install https://github.com/coxley/snmp-ifmib-graphite/archive/master.zip
 
 
 Usage
